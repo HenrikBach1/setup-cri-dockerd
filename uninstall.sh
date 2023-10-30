@@ -20,6 +20,8 @@ set -o pipefail
 
 KUBEADM_FLAGS_ENV="/var/lib/kubelet/kubeadm-flags.env"
 SERVICE_PATH="/etc/systemd/system/cri-docker.service"
+BIN_NAME="cri-dockerd"
+BIN_PATH="/usr/local/bin"
 
 if [[ ! -f "${KUBEADM_FLAGS_ENV}.bak" ]]; then
     echo "Backup of ${KUBEADM_FLAGS_ENV} is not found. Continuing..."
@@ -45,6 +47,7 @@ function uninstall_cri_dockerd() {
     sudo systemctl disable cri-docker.service
     sudo systemctl stop cri-docker.service
     sudo rm -f "${SERVICE_PATH}"
+    sudo rm -f "${BIN_PATH}/${BIN_NAME}"
 }
 
 function main() {
