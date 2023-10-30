@@ -28,9 +28,8 @@ else
     exit 1
 fi
 
-VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
-BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.linux-${ARCH}.tar.gz"
-# HB: VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt) && curl -LO https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.linux-${ARCH}.tar.gz
+VERSION=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
+BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.${ARCH}.tgz"
 
 FORCE=${FORCE:-n}
 CRI_SOCK="unix:///var/run/cri-dockerd.sock"
@@ -64,8 +63,7 @@ function install_cri_dockerd() {
         echo "Installing cri-dockerd"
         if [[ ! -s "${TAR_PATH}/${TAR_NAME}" ]]; then
             echo "Downloading binary of cri-dockerd"
-            # HB: mkdir -p "${TAR_PATH}" && wget -O "${TAR_PATH}/${TAR_NAME}" "${BIN_URL}"
-            mkdir -p "${TAR_PATH}" && curl -LO "${TAR_PATH}/${TAR_NAME}" "${BIN_URL}"
+            mkdir -p "${TAR_PATH}" && wget -O "${TAR_PATH}/${TAR_NAME}" "${BIN_URL}"
         fi
         sudo tar -xzvf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" "${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
         echo "Binary of cri-dockerd is installed"
