@@ -28,10 +28,10 @@ else
     exit 1
 fi
 
-VERSION=${VERSION:-v0.2.0}
-FORCE=${FORCE:-n}
+VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.linux-${ARCH}.tar.gz"
 
-BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/${VERSION}/cri-dockerd-${VERSION}-linux-${ARCH}.tar.gz"
+FORCE=${FORCE:-n}
 CRI_SOCK="unix:///var/run/cri-dockerd.sock"
 KUBEADM_FLAGS_ENV="/var/lib/kubelet/kubeadm-flags.env"
 if [[ ! -v KUBELET_KUBEADM_ARGS ]]; then
