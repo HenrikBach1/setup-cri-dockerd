@@ -56,8 +56,8 @@ function uninstall_cri_dockerd_exec() {
 
 function main() {
     back_configure_kubelet
-    uninstall_cri_dockerd_service
     uninstall_cri_dockerd_exec
+    uninstall_cri_dockerd_service
 }
 
 main
