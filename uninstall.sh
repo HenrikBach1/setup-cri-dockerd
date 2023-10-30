@@ -51,7 +51,7 @@ function uninstall_cri_dockerd_service() {
 
 function uninstall_cri_dockerd_exec() {
     echo "Uninstalling cri-dockerd executable"
-    sudo rm -f "${BIN_PATH}/${BIN_NAME}"
+    sudo rm "${BIN_PATH}/${BIN_NAME}"
 }
 
 function main() {
