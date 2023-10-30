@@ -138,7 +138,7 @@ function configure_kubelet() {
         echo cat "${KUBEADM_FLAGS_ENV}"
         # cat "${KUBEADM_FLAGS_ENV}"
         echo "================ Configure kubelet ========================="
-        echo "cp ${KUBEADM_FLAGS_ENV} ${KUBEADM_FLAGS_ENV}.bak"
+        echo "sudo cp ${KUBEADM_FLAGS_ENV} ${KUBEADM_FLAGS_ENV}.bak"
         echo "cat <<EOF > ${KUBEADM_FLAGS_ENV}"
         echo "${NEW_FLAGS}"
         echo "EOF"
