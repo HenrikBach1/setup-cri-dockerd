@@ -43,10 +43,11 @@ function back_configure_kubelet() {
 }
 
 function uninstall_cri_dockerd() {
-    echo "Uninstalling cri-dockerd"
+    echo "Uninstalling cri-dockerd.service"
     sudo systemctl disable cri-docker.service
     sudo systemctl stop cri-docker.service
     sudo rm -f "${SERVICE_PATH}"
+    echo "Uninstalling cri-dockerd executable"
     sudo rm -f "${BIN_PATH}/${BIN_NAME}"
 }
 
