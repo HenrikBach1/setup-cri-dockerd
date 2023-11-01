@@ -28,23 +28,23 @@ else
     exit 1
 fi
 
+BIN_NAME="cri-dockerd"
 TAR_EXT="tgz"
-VERSION=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
-BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.${ARCH}.${TAR_EXT}"
-TAR_NAME="cri-dockerd.${TAR_EXT}"
+VERSION=$(curl -s https://api.github.com/repos/Mirantis/${BIN_NAME}/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
+BIN_URL="https://github.com/Mirantis/${BIN_NAME}/releases/download/v${VERSION}/${BIN_NAME}-${VERSION}.${ARCH}.${TAR_EXT}"
+TAR_NAME="${BIN_NAME}.${TAR_EXT}"
+
+SERVICE_NAME="${BIN_NAME}.service"
+SERVICE_PATH="/etc/systemd/system/${SERVICE_NAME}"
+TAR_PATH="${TMPDIR:-/tmp}/install-${BIN_NAME}"
+BIN_PATH="/usr/local/bin"
 
 FORCE=${FORCE:-n}
-CRI_SOCK="unix:///var/run/cri-dockerd.sock"
+CRI_SOCK="unix:///var/run/${BIN_NAME}.sock"
 KUBEADM_FLAGS_ENV="/var/lib/kubelet/kubeadm-flags.env"
 if [[ ! -v KUBELET_KUBEADM_ARGS ]]; then
     KUBELET_KUBEADM_ARGS=""
 fi
-
-SERVICE_NAME="cri-docker.service"
-SERVICE_PATH="/etc/systemd/system/${SERVICE_NAME}"
-TAR_PATH="${TMPDIR:-/tmp/}/install-cri-dockerd"
-BIN_NAME="cri-dockerd"
-BIN_PATH="/usr/local/bin"
 
 function check_container_runtime_of_kubelet() {
     if [[ -f "${KUBEADM_FLAGS_ENV}" ]]; then
@@ -63,24 +63,23 @@ function install_cri_dockerd() {
     if [[ ! -s "${BIN_PATH}/${BIN_NAME}" \
             && ! -s "${TAR_PATH}/${TAR_NAME}" \
         ]]; then
-        echo "Installing cri-dockerd"
+        echo "Installing ${BIN_NAME}"
         if [[ ! -s "${TAR_PATH}/${TAR_NAME}" ]]; then
-            echo "Downloading binary of cri-dockerd"
+            echo "Downloading binary of ${BIN_NAME}"
             mkdir -p "${TAR_PATH}" && wget -O "${TAR_PATH}/${TAR_NAME}" "${BIN_URL}"
         fi
-        # TAR_EXT="${TAR_NAME##*.}"
-        if [[ "TAR_EXT" == "tar.gz" ]]; then
+        if [[ "${TAR_EXT}" == "tar.gz" ]]; then
             sudo tar -xzvf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" "${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
-        elif [[ "TAR_EXT" == "tgz" ]]; then
+        elif [[ "${TAR_EXT}" == "tgz" ]]; then
             sudo tar -xzf  "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" --transform 's|.*/||' "${BIN_PATH}/${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
         else
             echo "Unknown archive format..."
             exit 1
         fi
-        echo "Binary of cri-dockerd is installed"
+        echo "Binary of ${BIN_NAME} is installed"
         rm "${TAR_PATH}/${TAR_NAME}"
     else
-        echo "Binary of cri-dockerd already installed in either or both places:"
+        echo "Binary of ${BIN_NAME} already installed in either or both places:"
         echo "${TAR_PATH}/${TAR_NAME}"
         echo "${BIN_PATH}/${BIN_NAME}"
         echo "Run ./uninstall.sh"
@@ -89,7 +88,7 @@ function install_cri_dockerd() {
 
     echo "${BIN_PATH}/${BIN_NAME}" --version
     "${BIN_PATH}/${BIN_NAME}" --version || {
-        echo "Failed to install cri-dockerd"
+        echo "Failed to install ${BIN_NAME}"
         exit 1
     }
 }
@@ -108,7 +107,7 @@ Wants=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/local/bin/cri-dockerd --cri-dockerd-root-directory=/var/lib/dockershim --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin --container-runtime-endpoint ${CRI_SOCK} ${KUBELET_KUBEADM_ARGS}
+ExecStart=/usr/local/bin/${BIN_NAME} --${BIN_NAME}-root-directory=/var/lib/dockershim --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin --container-runtime-endpoint ${CRI_SOCK} ${KUBELET_KUBEADM_ARGS}
 ExecReload=/bin/kill -s HUP \$MAINPID
 TimeoutSec=0
 RestartSec=2
@@ -134,7 +133,7 @@ EOF
     systemctl enable "${SERVICE_NAME}"
     systemctl restart "${SERVICE_NAME}"
     systemctl status --no-pager "${SERVICE_NAME}" || {
-        echo "Failed to start cri-dockerd"
+        echo "Failed to start ${BIN_NAME}"
         exit 1
     }
 
@@ -174,8 +173,8 @@ function configure_kubelet() {
             ;;
         *)
             echo "You no enter 'y', so abort install now"
-            echo "but the cri-dockerd is installed and running"
-            echo "if need is uninstall the cri-dockerd please run:"
+            echo "but the ${BIN_NAME} is installed and running"
+            echo "if need to uninstall the ${BIN_NAME}, please run:"
             echo "   sudo systemctl stop ${SERVICE_NAME}"
             echo "   sudo systemctl disable ${SERVICE_NAME}"
             echo "   sudo rm ${SERVICE_PATH}"
