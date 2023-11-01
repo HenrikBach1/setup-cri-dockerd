@@ -59,16 +59,30 @@ function check_container_runtime_of_kubelet() {
 }
 
 function install_cri_dockerd() {
-    if [[ ! -s "${BIN_PATH}/${BIN_NAME}" ]]; then
+    if [[ ! -s "${BIN_PATH}/${BIN_NAME}" \
+            && ! -s "${TAR_PATH}/${TAR_NAME}" \
+        ]]; then
         echo "Installing cri-dockerd"
         if [[ ! -s "${TAR_PATH}/${TAR_NAME}" ]]; then
             echo "Downloading binary of cri-dockerd"
             mkdir -p "${TAR_PATH}" && wget -O "${TAR_PATH}/${TAR_NAME}" "${BIN_URL}"
         fi
-        sudo tar -xzvf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" "${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
+        TAR_EXT="${TAR_NAME##*.}"
+        if [[ "TAR_EXT" == "tar" ]]; then
+            sudo tar -xzvf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" "${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
+        elif [[ "TAR_EXT" == "tgz" ]]; then
+            sudo tar -xzf  "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" --transform 's|.*/||' "${BIN_PATH}/${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
+        else
+            echo "Unknown archive format..."
+            exit 1
+        fi
         echo "Binary of cri-dockerd is installed"
+        rm "${TAR_PATH}/${TAR_NAME}"
     else
-        echo "Binary of cri-dockerd already installed"
+        echo "Binary of cri-dockerd already installed in either or both places:"
+        echo "${TAR_PATH}/${TAR_NAME}"
+        echo "${BIN_PATH}/${BIN_NAME}"
+        echo "Run ./uninstall.sh""
     fi
 
     echo "${BIN_PATH}/${BIN_NAME}" --version
