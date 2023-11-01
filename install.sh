@@ -69,13 +69,17 @@ function install_cri_dockerd() {
             mkdir -p "${TAR_PATH}" && wget -O "${TAR_PATH}/${TAR_NAME}" "${BIN_URL}"
         fi
         if [[ "${TAR_EXT}" == "tar.gz" ]]; then
+            set -vx
             sudo tar -xzvf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" "${BIN_NAME}"
             if [[ $? -ne 0 ]]; then
+                set +vx
                 exit 1
             fi
         elif [[ "${TAR_EXT}" == "tgz" ]]; then
+            set -vx
             sudo tar -xzf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_NAME}" --transform 's|.*/||' "${BIN_NAME}/${BIN_NAME}"
             if [[ $? -ne 0 ]]; then
+                set +vx
                 exit 1
             fi
         else
