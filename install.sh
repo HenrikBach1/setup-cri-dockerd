@@ -70,10 +70,14 @@ function install_cri_dockerd() {
         fi
         if [[ "${TAR_EXT}" == "tar.gz" ]]; then
             sudo tar -xzvf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" "${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
-            ($? -ne 0) || exit 1
+            if [[ $? -ne 0 ]]; then
+                exit 1
+            fi
         elif [[ "${TAR_EXT}" == "tgz" ]]; then
             sudo tar -xzf  "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" --transform 's|.*/||' "${BIN_PATH}/${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
-            ($? -ne 0) || exit 1
+            if [[ $? -ne 0 ]]; then
+                exit 1
+            fi
         else
             echo "Unknown archive format..."
             exit 1
