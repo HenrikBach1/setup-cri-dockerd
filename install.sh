@@ -14,10 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
-BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.${ARCH}.tgz"
-TAR_NAME="cri-dockerd.tgz"
-
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -31,6 +27,10 @@ else
     echo "${ARCH} is not supported"
     exit 1
 fi
+
+VERSION=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
+BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.${ARCH}.tgz"
+TAR_NAME="cri-dockerd.tgz"
 
 FORCE=${FORCE:-n}
 CRI_SOCK="unix:///var/run/cri-dockerd.sock"
