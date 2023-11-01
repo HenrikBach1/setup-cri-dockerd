@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+VERSION=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
+BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.${ARCH}.tgz"
+TAR_NAME="cri-dockerd.tgz"
+
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -28,9 +32,6 @@ else
     exit 1
 fi
 
-VERSION=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
-BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.${ARCH}.tgz"
-
 FORCE=${FORCE:-n}
 CRI_SOCK="unix:///var/run/cri-dockerd.sock"
 KUBEADM_FLAGS_ENV="/var/lib/kubelet/kubeadm-flags.env"
@@ -40,7 +41,6 @@ fi
 
 SERVICE_NAME="cri-docker.service"
 SERVICE_PATH="/etc/systemd/system/${SERVICE_NAME}"
-TAR_NAME="cri-dockerd.tar.gz"
 TAR_PATH="${TMPDIR:-/tmp/}/install-cri-dockerd"
 BIN_NAME="cri-dockerd"
 BIN_PATH="/usr/local/bin"
@@ -68,7 +68,7 @@ function install_cri_dockerd() {
             mkdir -p "${TAR_PATH}" && wget -O "${TAR_PATH}/${TAR_NAME}" "${BIN_URL}"
         fi
         TAR_EXT="${TAR_NAME##*.}"
-        if [[ "TAR_EXT" == "tar" ]]; then
+        if [[ "TAR_EXT" == "tar.gz" ]]; then
             sudo tar -xzvf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" "${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
         elif [[ "TAR_EXT" == "tgz" ]]; then
             sudo tar -xzf  "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" --transform 's|.*/||' "${BIN_PATH}/${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
