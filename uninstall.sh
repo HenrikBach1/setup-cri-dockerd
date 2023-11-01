@@ -20,10 +20,11 @@ set -o pipefail
 
 KUBEADM_FLAGS_ENV="/var/lib/kubelet/kubeadm-flags.env"
 SERVICE_PATH="/etc/systemd/system/cri-docker.service"
+BIN_NAME="cri-dockerd"
+BIN_PATH="/usr/local/bin"
 
 if [[ ! -f "${KUBEADM_FLAGS_ENV}.bak" ]]; then
-    echo "Backing up ${KUBEADM_FLAGS_ENV} is not found"
-    echo 1
+    echo "Backup of ${KUBEADM_FLAGS_ENV} is not found. Continuing..."
 fi
 
 if [[ ! -f "${SERVICE_PATH}" ]]; then
@@ -32,22 +33,31 @@ if [[ ! -f "${SERVICE_PATH}" ]]; then
 fi
 
 function back_configure_kubelet() {
-    echo "Restoring ${KUBEADM_FLAGS_ENV}"
-    cp "${KUBEADM_FLAGS_ENV}.bak" "${KUBEADM_FLAGS_ENV}"
-    systemctl daemon-reload
-    systemctl restart kubelet
+    if [[ -f "${KUBEADM_FLAGS_ENV}.bak"
+            && -f ${KUBEADM_FLAGS_ENV} ]]; then
+        echo "Restoring ${KUBEADM_FLAGS_ENV}"
+        sudo cp "${KUBEADM_FLAGS_ENV}.bak" "${KUBEADM_FLAGS_ENV}"
+        sudo systemctl daemon-reload
+        sudo systemctl restart kubelet
+    fi
 }
 
-function uninstall_cri_dockerd() {
-    echo "Uninstalling cri-dockerd"
-    systemctl disable cri-docker.service
-    systemctl stop cri-docker.service
-    rm -f "${SERVICE_PATH}"
+function uninstall_cri_dockerd_service() {
+    echo "Uninstalling cri-dockerd.service"
+    sudo systemctl disable cri-docker.service
+    sudo systemctl stop cri-docker.service
+    sudo rm -f "${SERVICE_PATH}"
+}
+
+function uninstall_cri_dockerd_exec() {
+    echo "Uninstalling cri-dockerd executable"
+    sudo rm "${BIN_PATH}/${BIN_NAME}"
 }
 
 function main() {
     back_configure_kubelet
-    uninstall_cri_dockerd
+    uninstall_cri_dockerd_exec
+    uninstall_cri_dockerd_service
 }
 
 main
