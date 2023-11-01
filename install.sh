@@ -28,9 +28,10 @@ else
     exit 1
 fi
 
+TAR_EXT="tgz"
 VERSION=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//')
-BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.${ARCH}.tgz"
-TAR_NAME="cri-dockerd.tgz"
+BIN_URL="https://github.com/Mirantis/cri-dockerd/releases/download/v${VERSION}/cri-dockerd-${VERSION}.${ARCH}.${TAR_EXT}"
+TAR_NAME="cri-dockerd.${TAR_EXT}"
 
 FORCE=${FORCE:-n}
 CRI_SOCK="unix:///var/run/cri-dockerd.sock"
@@ -67,7 +68,7 @@ function install_cri_dockerd() {
             echo "Downloading binary of cri-dockerd"
             mkdir -p "${TAR_PATH}" && wget -O "${TAR_PATH}/${TAR_NAME}" "${BIN_URL}"
         fi
-        TAR_EXT="${TAR_NAME##*.}"
+        # TAR_EXT="${TAR_NAME##*.}"
         if [[ "TAR_EXT" == "tar.gz" ]]; then
             sudo tar -xzvf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" "${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
         elif [[ "TAR_EXT" == "tgz" ]]; then
