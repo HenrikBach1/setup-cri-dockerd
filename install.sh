@@ -86,6 +86,7 @@ function install_cri_dockerd() {
             echo "Unknown archive format..."
             exit 1
         fi
+        set +vx
         echo "Binary of ${BIN_NAME} is installed"
         sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
         rm "${TAR_PATH}/${TAR_NAME}"
