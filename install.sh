@@ -82,7 +82,7 @@ function install_cri_dockerd() {
         echo "Binary of cri-dockerd already installed in either or both places:"
         echo "${TAR_PATH}/${TAR_NAME}"
         echo "${BIN_PATH}/${BIN_NAME}"
-        echo "Run ./uninstall.sh""
+        echo "Run ./uninstall.sh"
     fi
 
     echo "${BIN_PATH}/${BIN_NAME}" --version
