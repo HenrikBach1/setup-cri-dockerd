@@ -69,12 +69,12 @@ function install_cri_dockerd() {
             mkdir -p "${TAR_PATH}" && wget -O "${TAR_PATH}/${TAR_NAME}" "${BIN_URL}"
         fi
         if [[ "${TAR_EXT}" == "tar.gz" ]]; then
-            sudo tar -xzvf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" "${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
+            sudo tar -xzvf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" "${BIN_NAME}"
             if [[ $? -ne 0 ]]; then
                 exit 1
             fi
         elif [[ "${TAR_EXT}" == "tgz" ]]; then
-            sudo tar -xzf  "${TAR_PATH}/${TAR_NAME}" -C "${BIN_PATH}" --transform 's|.*/||' "${BIN_PATH}/${BIN_NAME}" && sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
+            sudo tar -xzf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_NAME}" --transform 's|.*/||' "${BIN_NAME}/${BIN_NAME}"
             if [[ $? -ne 0 ]]; then
                 exit 1
             fi
@@ -83,6 +83,7 @@ function install_cri_dockerd() {
             exit 1
         fi
         echo "Binary of ${BIN_NAME} is installed"
+        sudo chmod +x "${BIN_PATH}/${BIN_NAME}"
         rm "${TAR_PATH}/${TAR_NAME}"
     else
         echo "Binary of ${BIN_NAME} already installed in either or both places:"
