@@ -83,6 +83,7 @@ function install_cri_dockerd() {
         echo "${TAR_PATH}/${TAR_NAME}"
         echo "${BIN_PATH}/${BIN_NAME}"
         echo "Run ./uninstall.sh"
+        exit 1
     fi
 
     echo "${BIN_PATH}/${BIN_NAME}" --version
