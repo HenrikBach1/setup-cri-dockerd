@@ -77,7 +77,8 @@ function install_cri_dockerd() {
             fi
         elif [[ "${TAR_EXT}" == "tgz" ]]; then
             set -vx
-            sudo tar -xzf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_NAME}" --transform 's|.*/||' "${BIN_NAME}/${BIN_NAME}"
+            # sudo tar -xzf "${TAR_PATH}/${TAR_NAME}" -C "${BIN_NAME}" --transform 's|.*/||' "${BIN_NAME}/${BIN_NAME}"
+            sudo tar -xzOf "${TAR_PATH}/${TAR_NAME}" > "${BIN_NAME}/${BIN_NAME}"
             if [[ $? -ne 0 ]]; then
                 set +vx
                 exit 1
